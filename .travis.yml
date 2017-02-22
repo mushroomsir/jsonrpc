@@ -1,0 +1,12 @@
+sudo: false
+language: go
+go:
+  - 1.7
+services:
+  - redis-server
+before_install:
+  - go get -t -v ./...
+  - go get github.com/mattn/goveralls
+script:
+  - go test -coverprofile=sessionredis.coverprofile
+  - goveralls -coverprofile=sessionredis.coverprofile -service=travis-ci
