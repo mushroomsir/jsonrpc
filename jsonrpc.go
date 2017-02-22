@@ -34,26 +34,21 @@ type PayloadReq struct {
 
 // ParseReq ...
 func ParseReq(msg string) (req *ClientRequest, err error) {
-	if msg == "" {
-		err = errors.New("empty jsonrpc message")
-		return
-	}
 	p := &PayloadReq{}
-	err = json.Unmarshal([]byte(msg), p)
-	if err != nil {
-		err = errors.New("invalid jsonrpc message structures")
+	if err = validateMsg(msg, p); err != nil {
 		return
 	}
 	req = &ClientRequest{PlayLoad: p}
 	if p.Version != jsonRPCVersion {
 		req.Type = invalid
 		err = errors.New("invalid jsonrpc version")
-	} else if p.ID == "" {
-		req.Type = notification
 	} else if p.Method == "" {
-		req.Type = request
+		req.Type = invalid
+		err = errors.New("invalid jsonrpc object")
+	} else if p.ID == nil {
+		req.Type = notification
 	} else {
-		err = errors.New("invalid jsonrpc method")
+		req.Type = request
 	}
 	return
 }
@@ -97,14 +92,9 @@ type PayloadRes struct {
 
 // ParseRes ...
 func ParseRes(msg string) (res *ClientResponse, err error) {
-	if msg == "" {
-		err = errors.New("empty jsonrpc message")
-		return
-	}
+
 	p := &PayloadRes{}
-	err = json.Unmarshal([]byte(msg), p)
-	if err != nil {
-		err = errors.New("invalid jsonrpc message structures")
+	if err = validateMsg(msg, p); err != nil {
 		return
 	}
 	res = &ClientResponse{PlayLoad: p}
@@ -173,6 +163,18 @@ func validateID(id interface{}) (err error) {
 		default:
 			err = errors.New("invalid id that MUST contain a String, Number, or NULL value")
 		}
+	}
+	return
+}
+func validateMsg(msg string, p interface{}) (err error) {
+	if msg == "" {
+		err = errors.New("empty jsonrpc message")
+		return
+	}
+	err = json.Unmarshal([]byte(msg), p)
+	if err != nil {
+		err = errors.New("invalid jsonrpc message structures")
+		return
 	}
 	return
 }

@@ -69,5 +69,58 @@ func TestProducer(t *testing.T) {
 		assert.Equal("123", val.PlayLoad.ID)
 		assert.Equal("update", val.PlayLoad.Method)
 		assert.Equal(request, val.Type)
+
+		val, err = jsonrpc.ParseReq("{\"jsonrpc\":\"2.0,\"result\":\"OK\",\"id\":\"123\"}")
+		assert.NotNil(err)
+		assert.Equal("invalid jsonrpc message structures", err.Error())
+
+		val, err = jsonrpc.ParseReq("{\"jsonrpc\":\"3.0\",\"result\":\"OK\",\"id\":\"123\"}")
+		assert.NotNil(err)
+		assert.Equal("invalid jsonrpc version", err.Error())
+
+		val, err = jsonrpc.ParseReq("{\"jsonrpc\":\"2.0\",\"method\":\"update\",\"params\":0}")
+		assert.Nil(err)
+		assert.Equal(float64(0), val.PlayLoad.Params)
+		assert.Equal("update", val.PlayLoad.Method)
+		assert.Equal(notification, val.Type)
+
+		val, err = jsonrpc.ParseReq("{\"jsonrpc\":\"2.0\",\"params\":0,\"id\":\"123\"}")
+		assert.NotNil(err)
+		assert.Equal("invalid jsonrpc object", err.Error())
+
 	})
+	t.Run("jsonrpc with parseres that should be", func(t *testing.T) {
+		assert := assert.New(t)
+
+		val, err := jsonrpc.ParseRes("")
+		assert.Empty(val)
+		assert.NotNil(err)
+		assert.Equal("empty jsonrpc message", err.Error())
+
+		val, err = jsonrpc.ParseRes("{\"jsonrpc\":\"2.0\",\"result\":\"OK\",\"id\":\"123\"}")
+		assert.Nil(err)
+		assert.Equal("123", val.PlayLoad.ID)
+		assert.Equal("OK", val.PlayLoad.Result)
+		assert.Equal(success, val.Type)
+
+		val, err = jsonrpc.ParseRes("{\"jsonrpc\":\"2.0,\"result\":\"OK\",\"id\":\"123\"}")
+		assert.NotNil(err)
+		assert.Equal("invalid jsonrpc message structures", err.Error())
+
+		val, err = jsonrpc.ParseRes("{\"jsonrpc\":\"3.0\",\"result\":\"OK\",\"id\":\"123\"}")
+		assert.NotNil(err)
+		assert.Equal("invalid jsonrpc version", err.Error())
+
+		val, err = jsonrpc.ParseRes("{\"jsonrpc\":\"2.0\",\"error\":{\"code\":1,\"message\":\"test\"}}")
+		assert.Nil(err)
+		assert.Equal("test", val.PlayLoad.Error.Message)
+		assert.Equal(1, val.PlayLoad.Error.Code)
+		assert.Equal(errorType, val.Type)
+
+		val, err = jsonrpc.ParseRes("{\"jsonrpc\":\"2.0\",\"id\":\"123\"}")
+		assert.NotNil(err)
+		assert.Equal("invalid jsonrpc object", err.Error())
+
+	})
+
 }
