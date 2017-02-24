@@ -63,7 +63,7 @@ type ErrorObj struct {
 	Data    interface{} `json:"data,omitempty"`
 }
 
-// Request creates a JSON-RPC 2.0 request object, return JsonRpc json.
+// Request creates a JSON-RPC 2.0 request message structures.
 // the id must be {String|Integer|nil} type
 func Request(id interface{}, method string, args ...interface{}) (result string, err error) {
 	if err = validateID(id); err != nil {
@@ -81,12 +81,12 @@ func Request(id interface{}, method string, args ...interface{}) (result string,
 	return string(val), err
 }
 
-// Notification Creates a JSON-RPC 2.0 notification object, return JsonRpc json.
+// Notification Creates a JSON-RPC 2.0 notification message structures.
 func Notification(method string, args ...interface{}) (string, error) {
 	return Request(nil, method, args...)
 }
 
-//Batch ...
+//Batch Creates a JSON-RPC 2.0 batch message structures.
 func Batch(batch ...string) (arrstr string) {
 	if len(batch) == 0 {
 		return "[]"
@@ -97,12 +97,12 @@ func Batch(batch ...string) (arrstr string) {
 		arrstr += ","
 	}
 	arrstr += batch[len(batch)-1]
-	arrstr += ",]"
+	arrstr += "]"
 	return
 }
 
-// ParseReq ...
-func ParseReq(msg string) (req *ClientRequest, err error) {
+// Parse Parse message of from client request.
+func Parse(msg string) (req *ClientRequest, err error) {
 	p := make(map[string]interface{}, 0)
 	if err = validateMsg(msg, &p); err != nil {
 		return
@@ -111,8 +111,8 @@ func ParseReq(msg string) (req *ClientRequest, err error) {
 	return
 }
 
-// ParseReqBatch ...
-func ParseReqBatch(msg string) (req []*ClientRequest, err error) {
+// ParseBatch Parse batch message of from client request.
+func ParseBatch(msg string) (req []*ClientRequest, err error) {
 	if msg == "" || len(msg) < 2 {
 		err = errors.New("empty message")
 		return
@@ -128,8 +128,8 @@ func ParseReqBatch(msg string) (req []*ClientRequest, err error) {
 	return
 }
 
-// ParseRes ...
-func ParseRes(msg string) (res *ClientResponse, err error) {
+// ParseReply Parse message of from server reply.
+func ParseReply(msg string) (res *ClientResponse, err error) {
 	p := make(map[string]interface{}, 0)
 	if err = validateMsg(msg, &p); err != nil {
 		return
@@ -137,8 +137,8 @@ func ParseRes(msg string) (res *ClientResponse, err error) {
 	return parseResMap(p)
 }
 
-// ParseResBatch ...
-func ParseResBatch(msg string) (res []*ClientResponse, err error) {
+// ParseBatchReply Parse message of server reply batch request.
+func ParseBatchReply(msg string) (res []*ClientResponse, err error) {
 	if msg == "" || len(msg) < 2 {
 		err = errors.New("empty message")
 		return
