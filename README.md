@@ -27,6 +27,18 @@ Creates a JSON-RPC 2.0 message structures
     "id": 123
     }
 ```
+####  jsonrpc.Request2(method[, params])
+Creates a JSON-RPC 2.0 message structures, the id is automatic generation by strconv.FormatInt(rand.Int63(), 10)
+- `method`: {String}
+- `params`:  {interface{}}, optional
+```go
+	val, err := jsonrpc.Request("update")
+	{
+    "jsonrpc": "2.0",
+    "method": "update",
+    "id": randnum
+    }
+```
 ####  jsonrpc.Notification(method[, params])
 Creates a JSON-RPC 2.0 notification message structures
 - `method`: {String}

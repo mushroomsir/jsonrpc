@@ -58,7 +58,7 @@ func TestProducer(t *testing.T) {
 
 		val, err := jsonrpc.Success("123", nil)
 		assert.NotNil(err)
-		assert.Equal("result parameter is required", err.Error())
+		assert.Equal(jsonrpc.ErrResultArgument, err)
 
 		val, err = jsonrpc.Success("123", "OK")
 		assert.Nil(err)
@@ -92,7 +92,7 @@ func TestProducer(t *testing.T) {
 		val, err := jsonrpc.Parse("")
 		assert.Empty(val)
 		assert.NotNil(err)
-		assert.Equal("empty jsonrpc message", err.Error())
+		assert.Equal(jsonrpc.ErrEmptyMessage, err)
 
 		val, err = jsonrpc.Parse("{\"jsonrpc\":\"2.0\",\"method\":\"update\",\"id\":\"123\"}")
 		assert.Nil(err)
@@ -125,7 +125,7 @@ func TestProducer(t *testing.T) {
 		val, err := jsonrpc.ParseReply("")
 		assert.Empty(val)
 		assert.NotNil(err)
-		assert.Equal("empty jsonrpc message", err.Error())
+		assert.Equal(jsonrpc.ErrEmptyMessage, err)
 
 		val, err = jsonrpc.ParseReply("{\"jsonrpc\":\"2.0\",\"result\":\"OK\",\"id\":\"123\"}")
 		assert.Nil(err)
@@ -179,7 +179,7 @@ func TestProducer(t *testing.T) {
 		}
 
 		val, err = jsonrpc.ParseBatchReply("")
-		assert.Equal("empty message", err.Error())
+		assert.Equal(jsonrpc.ErrEmptyMessage, err)
 
 		str := `[
         {"jsonrpc": "2.0", "result": 7, "id": "1"},
